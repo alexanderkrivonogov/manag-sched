@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Расписание — Менеджмент в образовании</title>
+<style>
+  :root{
+    --bg:#F6F5F1;
+    --card:#FFFFFF;
+    --line:#E1DED4;
+    --ink:#2A2A26;
+    --muted:#7A7870;
+    --accent:#2F5D50;
+    --accent-soft:#E1F0EB;
+    --now-bg:#E7F5EA;
+    --now-line:#3E8E5B;
+    --now-text:#1F5C38;
+    --num-tag:#5F5E5A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    line-height:1.45;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  h1{
+    font-size:20px;
+    font-weight:600;
+    margin:0 0 2px;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 16px;
+  }
+  .week-banner{
+    background:var(--accent);
+    color:#fff;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:14px;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .week-banner .dot{
+    width:9px;height:9px;border-radius:50%;
+    background:#fff;
+    flex-shrink:0;
+  }
+  .day-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .day-name{
+    font-size:15px;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .pair-label{
+    font-size:12px;
+    color:var(--muted);
+    margin:10px 0 6px;
+  }
+  .pair-label:first-of-type{margin-top:0;}
+  .class-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    text-decoration:none;
+    color:var(--ink);
+    background:var(--bg);
+    border-radius:10px;
+    padding:10px 12px;
+    border:1px solid transparent;
+  }
+  .split{
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .split .class-row{
+    background:var(--card);
+    border-radius:0;
+  }
+  .split .class-row + .class-row{
+    border-top:1px solid var(--line);
+  }
+  .class-row.now{
+    background:var(--now-bg);
+    border-color:var(--now-line);
+  }
+  .class-title{font-size:14px;}
+  .class-title.muted{color:var(--muted);}
+  .tag{
+    font-size:11px;
+    font-weight:600;
+    color:var(--num-tag);
+    display:block;
+    margin-bottom:2px;
+  }
+  .tag.now-tag{color:var(--now-text);}
+  .join{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+  }
+  .class-row.now .join{
+    background:var(--now-line);
+    color:#fff;
+  }
+  .no-class .join{visibility:hidden;}
+  .rest-card{
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:12px;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .rest-card b{color:var(--ink);}
+  .teacher{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .euk-title{
+    font-size:15px;
+    font-weight:600;
+    margin:24px 0 10px;
+  }
+  .footnote{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:20px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Расписание занятий</h1>
+  <p class="subtitle">Менеджмент в образовании · группа 403-61м · осенний семестр 2026-2027</p>
+
+  <div class="week-banner" id="weekBanner">
+    <span class="dot"></span>
+    <span id="weekBannerText">Определяю текущую неделю…</span>
+  </div>
+
+  <div class="day-card">
+    <div class="day-name">Понедельник</div>
+    <div class="pair-label">7 пара, каждую неделю</div>
+    <a class="class-row" href="https://telemost.yandex.ru/j/96295573002325" target="_blank" rel="noopener">
+      <span class="class-title">Стратегическое управление</span>
+      <span class="join">▶</span>
+    </a>
+    <div class="pair-label">8 пара</div>
+    <div class="split">
+      <a class="class-row" data-week="num" href="https://telemost.yandex.ru/j/96295573002325" target="_blank" rel="noopener">
+        <span><span class="tag" data-tagfor="num">Числитель</span><span class="class-title">Стратегическое управление (пр)</span></span>
+        <span class="join">▶</span>
+      </a>
+      <a class="class-row" data-week="den" href="https://telemost.yandex.ru/j/88106474820939" target="_blank" rel="noopener">
+        <span><span class="tag" data-tagfor="den">Знаменатель</span><span class="class-title">Лидерство и командная работа</span></span>
+        <span class="join">▶</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-name">Вторник</div>
+    <div class="pair-label">7 пара</div>
+    <div class="split">
+      <div class="class-row no-class" data-week="num">
+        <span><span class="tag" data-tagfor="num">Числитель</span><span class="class-title muted">Нет занятия</span></span>
+        <span class="join">▶</span>
+      </div>
+      <a class="class-row" data-week="den" href="https://telemost.yandex.ru/j/76895692008309" target="_blank" rel="noopener">
+        <span><span class="tag" data-tagfor="den">Знаменатель</span><span class="class-title">Самоорганизация и саморазвитие</span></span>
+        <span class="join">▶</span>
+      </a>
+    </div>
+    <div class="pair-label">8 пара, каждую неделю</div>
+    <a class="class-row" href="https://telemost.yandex.ru/j/13351256003096" target="_blank" rel="noopener">
+      <span class="class-title">Методология разработки программ и проектов</span>
+      <span class="join">▶</span>
+    </a>
+  </div>
+
+  <div class="day-card">
+    <div class="day-name">Среда</div>
+    <div class="pair-label">7 пара, каждую неделю</div>
+    <a class="class-row" href="https://telemost.yandex.ru/j/77730929574861" target="_blank" rel="noopener">
+      <span class="class-title">Методы принятия управленческих решений</span>
+      <span class="join">▶</span>
+    </a>
+    <div class="pair-label">8 пара</div>
+    <div class="split">
+      <a class="class-row" data-week="num" href="https://telemost.yandex.ru/j/81150094279851" target="_blank" rel="noopener">
+        <span><span class="tag" data-tagfor="num">Числитель, с 21.09</span><span class="class-title">Учебная практика, научно-ознакомительная</span></span>
+        <span class="join">▶</span>
+      </a>
+      <div class="class-row no-class" data-week="den">
+        <span><span class="tag" data-tagfor="den">Знаменатель</span><span class="class-title muted">Нет занятия</span></span>
+        <span class="join">▶</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-name">Четверг</div>
+    <div class="pair-label">каждую неделю</div>
+    <a class="class-row" href="https://telemost.yandex.ru/j/10691062228574" target="_blank" rel="noopener" style="margin-bottom:8px;">
+      <span class="class-title">7 пара — Практикум по межкультурной коммуникации</span>
+      <span class="join">▶</span>
+    </a>
+    <a class="class-row" href="https://telemost.yandex.ru/j/36128478194644" target="_blank" rel="noopener">
+      <span class="class-title">8 пара — Организационный менеджмент</span>
+      <span class="join">▶</span>
+    </a>
+  </div>
+
+  <div class="day-card">
+    <div class="day-name">Пятница</div>
+    <div class="pair-label">7 пара, каждую неделю</div>
+    <a class="class-row" href="https://telemost.yandex.ru/j/53581042227900" target="_blank" rel="noopener">
+      <span class="class-title">Современные проблемы менеджмента</span>
+      <span class="join">▶</span>
+    </a>
+    <div class="pair-label">8 пара</div>
+    <div class="split">
+      <a class="class-row" data-week="num" href="https://telemost.yandex.ru/j/53581042227900" target="_blank" rel="noopener">
+        <span><span class="tag" data-tagfor="num">Числитель</span><span class="class-title">Современные проблемы менеджмента (пр)</span></span>
+        <span class="join">▶</span>
+      </a>
+      <div class="class-row no-class" data-week="den">
+        <span><span class="tag" data-tagfor="den">Знаменатель</span><span class="class-title muted">Нет занятия</span></span>
+        <span class="join">▶</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rest-card">
+    <b>Суббота</b> · 4 пара — День самостоятельной работы
+  </div>
+
+  <div class="euk-title">ЭУК, асинхронные лекции по 16 ч</div>
+  <div class="day-card">
+    <a class="class-row" href="https://telemost.yandex.ru/j/88106474820939" target="_blank" rel="noopener" style="margin-bottom:8px;">
+      <span class="class-title">Лидерство и командная работа</span>
+      <span class="join">▶</span>
+    </a>
+    <a class="class-row" href="https://telemost.yandex.ru/j/76895692008309" target="_blank" rel="noopener">
+      <span class="class-title">Самоорганизация и саморазвитие</span>
+      <span class="join">▶</span>
+    </a>
+  </div>
+
+  <p class="footnote" id="rangeFootnote"></p>
+</div>
+
+<script>
+function d(s){
+  var p = s.split('.');
+  var day = parseInt(p[0],10), month = parseInt(p[1],10)-1, year = 2000+parseInt(p[2],10);
+  return new Date(year, month, day, 0,0,0,0);
+}
+function dEnd(s){
+  var dt = d(s);
+  dt.setHours(23,59,59,999);
+  return dt;
+}
+
+var numeratorRanges = [
+  ["01.09.26","06.09.26"],
+  ["14.09.26","20.09.26"],
+  ["28.09.26","04.10.26"],
+  ["12.10.26","18.10.26"],
+  ["26.10.26","01.11.26"],
+  ["09.11.26","15.11.26"],
+  ["23.11.26","29.11.26"],
+  ["07.12.26","13.12.26"],
+  ["21.12.26","27.12.26"]
+];
+var denominatorRanges = [
+  ["07.09.26","13.09.26"],
+  ["21.09.26","27.09.26"],
+  ["05.10.26","11.10.26"],
+  ["19.10.26","25.10.26"],
+  ["02.11.26","08.11.26"],
+  ["16.11.26","22.11.26"],
+  ["30.11.26","06.12.26"],
+  ["14.12.26","20.12.26"],
+  ["28.12.26","03.01.27"]
+];
+
+function findRange(ranges, now){
+  for (var i=0;i<ranges.length;i++){
+    var start = d(ranges[i][0]);
+    var end = dEnd(ranges[i][1]);
+    if (now >= start && now <= end){
+      return ranges[i];
+    }
+  }
+  return null;
+}
+
+var now = new Date();
+var weekType = null;
+var activeRange = null;
+
+var numMatch = findRange(numeratorRanges, now);
+var denMatch = findRange(denominatorRanges, now);
+
+if (numMatch){ weekType = 'num'; activeRange = numMatch; }
+else if (denMatch){ weekType = 'den'; activeRange = denMatch; }
+
+var bannerText = document.getElementById('weekBannerText');
+var footnote = document.getElementById('rangeFootnote');
+
+if (weekType){
+  var label = weekType === 'num' ? 'числителя' : 'знаменателя';
+  bannerText.textContent = 'Сейчас идёт неделя ' + label + ' (' + activeRange[0].slice(0,5) + '–' + activeRange[1].slice(0,5) + ')';
+
+  var rows = document.querySelectorAll('.class-row[data-week]');
+  rows.forEach(function(row){
+    if (row.getAttribute('data-week') === weekType){
+      row.classList.add('now');
+    }
+  });
+  var tags = document.querySelectorAll('.tag[data-tagfor="' + weekType + '"]');
+  tags.forEach(function(tag){
+    tag.classList.add('now-tag');
+    tag.textContent = tag.textContent + ' · сейчас';
+  });
+
+  footnote.textContent = 'Неделя определяется автоматически по сегодняшней дате. Откройте эту страницу в любой день — подсветка обновится сама.';
+} else {
+  bannerText.textContent = 'Дата вне известного диапазона семестра — подсветка недели недоступна.';
+  footnote.textContent = 'Диапазоны числителя и знаменателя заданы на осенний семестр 2026-2027.';
+}
+
+// Преподаватели: впиши ФИО между кавычками — оно появится под названием предмета везде, где он встречается.
+var teachers = {
+  "Стратегическое управление": "Воронина Евгения Васильевна",
+  "Лидерство и командная работа": "Зеленцова Светлана Юрьевна",
+  "Самоорганизация и саморазвитие": "Усаева Наталья Робертовна",
+  "Методология разработки программ и проектов": "Повзун Вера Дмитриевна",
+  "Методы принятия управленческих решений": "Исаева Ирина Александровна",
+  "Учебная практика, научно-ознакомительная": "",
+  "Практикум по межкультурной коммуникации": "Иванова Елена Александровна",
+  "Организационный менеджмент": "Иванова Ольга Юрьевна",
+  "Современные проблемы менеджмента": "Попова Екатерина Владимировна"
+};
+document.querySelectorAll('.class-title:not(.muted)').forEach(function(el){
+  var text = el.textContent;
+  Object.keys(teachers).forEach(function(name){
+    if (teachers[name] && text.indexOf(name) !== -1){
+      var t = document.createElement('span');
+      t.className = 'teacher';
+      t.textContent = teachers[name];
+      el.appendChild(t);
+    }
+  });
+});
+</script>
+</body>
+</html>
