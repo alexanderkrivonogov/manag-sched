@@ -147,6 +147,67 @@
     color:var(--muted);
     margin-top:2px;
   }
+  .day-card.today{
+    border:2px solid var(--accent);
+    box-shadow:0 4px 16px rgba(47,93,80,.14);
+    padding:13px 15px;
+  }
+  .today-badge{
+    display:inline-block;
+    margin-left:8px;
+    padding:2px 9px;
+    border-radius:999px;
+    background:var(--accent);
+    color:#fff;
+    font-size:11px;
+    font-weight:600;
+    vertical-align:middle;
+  }
+  .rest-card.today{
+    border:2px solid var(--accent);
+    border-style:solid;
+  }
+  .time{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .status{
+    display:block;
+    width:fit-content;
+    font-size:11px;
+    font-weight:700;
+    margin-bottom:3px;
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .status.live-status{background:#D93F3F;color:#fff;}
+  .status.next-status{background:var(--accent-soft);color:var(--accent);}
+  .class-row.live{
+    background:#FFF3E0;
+    border:2px solid #E8772E;
+    padding:9px 11px;
+  }
+  .class-row.live .join{background:#E8772E;color:#fff;}
+  .class-row.next{border:1px dashed var(--accent);}
+  .live-dot{
+    display:inline-block;
+    width:7px;height:7px;border-radius:50%;
+    background:#fff;
+    margin-right:5px;
+    animation:blink 1.2s infinite;
+  }
+  @keyframes blink{50%{opacity:.25;}}
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#181A18;--card:#232623;--line:#3A3E3A;--ink:#ECEBE6;--muted:#9A9890;
+      --accent:#5FB59C;--accent-soft:#28403A;--now-bg:#22382B;--now-line:#4FA36F;--now-text:#8FD6A9;--num-tag:#B5B3AB;
+    }
+    .class-row.live{background:#3B2A1A;}
+    .today-badge,.week-banner{color:#0F1A16;}
+    .class-row.live .join,.class-row.now .join{color:#0F1A16;}
+  }
   .euk-title{
     font-size:15px;
     font-weight:600;
@@ -328,7 +389,10 @@ function findRange(ranges, now){
   return null;
 }
 
-var now = new Date();
+var TEST_T = (new URLSearchParams(location.search)).get('t'); // для проверки: ?t=2026-09-24T19:30
+var TEST_OFFSET = TEST_T ? (new Date(TEST_T).getTime() - Date.now()) : 0;
+function getNow(){ return new Date(Date.now() + TEST_OFFSET); }
+var now = getNow();
 var weekType = null;
 var activeRange = null;
 
@@ -370,7 +434,7 @@ var teachers = {
   "Самоорганизация и саморазвитие": "Усаева Наталья Робертовна",
   "Методология разработки программ и проектов": "Повзун Вера Дмитриевна",
   "Методы принятия управленческих решений": "Исаева Ирина Александровна",
-  "Учебная практика, научно-ознакомительная": "",
+  "Учебная практика, научно-ознакомительная": "Сальков Алексей Владимирович",
   "Практикум по межкультурной коммуникации": "Иванова Елена Александровна",
   "Организационный менеджмент": "Иванова Ольга Юрьевна",
   "Современные проблемы менеджмента": "Попова Екатерина Владимировна"
@@ -386,6 +450,145 @@ document.querySelectorAll('.class-title:not(.muted)').forEach(function(el){
     }
   });
 });
+
+// ===== Время пар (СурГУ) =====
+var PAIRS = {
+  1:["08:30","09:50"], 2:["10:00","11:20"], 3:["11:30","12:50"], 4:["13:20","14:40"],
+  5:["14:50","16:10"], 6:["16:20","17:40"], 7:["18:00","19:20"], 8:["19:30","20:50"]
+};
+var DAY_NAMES = {"Понедельник":1,"Вторник":2,"Среда":3,"Четверг":4,"Пятница":5};
+
+function mins(hhmm){ var a=hhmm.split(':'); return parseInt(a[0],10)*60+parseInt(a[1],10); }
+
+// Разбираем страницу: какому дню и паре принадлежит каждая строка
+var dayCards = {};
+var lessonRows = []; // {el, day, pair}
+document.querySelectorAll('.day-card').forEach(function(card){
+  var nameEl = card.querySelector('.day-name');
+  if (!nameEl) return;
+  var day = DAY_NAMES[nameEl.textContent.trim()];
+  if (!day) return;
+  dayCards[day] = card;
+  card._nameEl = nameEl;
+  var curPair = null;
+  Array.prototype.forEach.call(card.children, function(ch){
+    if (ch.classList.contains('pair-label')){
+      var m = ch.textContent.match(/(\d)\s*пара/);
+      curPair = m ? parseInt(m[1],10) : null;
+      if (m && PAIRS[curPair]) ch.textContent += ' · ' + PAIRS[curPair][0] + '–' + PAIRS[curPair][1];
+      return;
+    }
+    var rows = ch.classList.contains('split') ? ch.querySelectorAll('.class-row') : (ch.classList.contains('class-row') ? [ch] : []);
+    Array.prototype.forEach.call(rows, function(row){
+      var pair = curPair;
+      var t = row.querySelector('.class-title');
+      var m2 = t && t.textContent.match(/^(\d)\s*пара\s*—/);
+      if (m2){
+        pair = parseInt(m2[1],10);
+        // переносим "7 пара —" из названия в строку со временем, оборачиваем в один левый блок
+        t.firstChild.nodeValue = t.firstChild.nodeValue.replace(/^\d\s*пара\s*—\s*/, '');
+        var wrap = document.createElement('span');
+        var tm = document.createElement('span');
+        tm.className = 'time';
+        tm.style.marginTop = '0';
+        tm.style.marginBottom = '2px';
+        tm.textContent = pair + ' пара · ' + PAIRS[pair][0] + '–' + PAIRS[pair][1];
+        row.insertBefore(wrap, t);
+        wrap.appendChild(tm);
+        wrap.appendChild(t);
+      }
+      if (pair) lessonRows.push({el: row, day: day, pair: pair});
+    });
+  });
+});
+var restCard = document.querySelector('.rest-card');
+
+function clearLive(){
+  document.querySelectorAll('.status').forEach(function(e){ e.remove(); });
+  document.querySelectorAll('.class-row.live,.class-row.next').forEach(function(e){ e.classList.remove('live','next'); });
+}
+function addStatus(row, cls, text){
+  var host = row.querySelector('span'); // левый блок строки
+  var st = document.createElement('span');
+  st.className = 'status ' + cls;
+  st.innerHTML = text;
+  host.insertBefore(st, host.firstChild);
+}
+
+function tick(){
+  var n = getNow();
+  var wd = n.getDay(); // 0=вс
+  var cur = n.getHours()*60 + n.getMinutes();
+  var sec = n.getSeconds();
+  clearLive();
+
+  // выделяем сегодняшний день
+  Object.keys(dayCards).forEach(function(k){
+    var c = dayCards[k];
+    var isToday = (parseInt(k,10) === wd);
+    c.classList.toggle('today', isToday);
+    var b = c._nameEl.querySelector('.today-badge');
+    if (isToday && !b){
+      b = document.createElement('span'); b.className='today-badge'; b.textContent='Сегодня';
+      c._nameEl.appendChild(b);
+    }
+    if (!isToday && b) b.remove();
+  });
+  if (restCard){
+    var isSat = (wd === 6);
+    restCard.classList.toggle('today', isSat);
+    var sb = restCard.querySelector('.today-badge');
+    if (isSat && !sb){
+      sb = document.createElement('span'); sb.className='today-badge'; sb.textContent='Сегодня';
+      restCard.appendChild(sb);
+    }
+    if (!isSat && sb) sb.remove();
+    var satPair = PAIRS[4];
+    if (isSat && cur >= mins(satPair[0]) && cur < mins(satPair[1])){
+      restCard.querySelector('b').textContent = 'Суббота (идёт 4 пара)';
+    } else if (restCard.querySelector('b')) {
+      restCard.querySelector('b').textContent = 'Суббота';
+    }
+  }
+
+  // пары сегодня, которые реально проходят на этой неделе
+  var todays = lessonRows.filter(function(r){
+    if (r.day !== wd) return false;
+    if (r.el.classList.contains('no-class')) return false;
+    var w = r.el.getAttribute('data-week');
+    if (w && weekType && w !== weekType) return false;
+    return true;
+  });
+
+  var nextRow = null, nextStart = 1e9;
+  todays.forEach(function(r){
+    var st = mins(PAIRS[r.pair][0]), en = mins(PAIRS[r.pair][1]);
+    if (cur >= st && cur < en){
+      var left = en - cur - (sec > 0 ? 1 : 0);
+      if (left < 0) left = 0;
+      r.el.classList.add('live');
+      addStatus(r.el, 'live-status', '<span class="live-dot"></span>Идёт сейчас · ещё ' + left + ' мин (до ' + PAIRS[r.pair][1] + ')');
+    } else if (cur < st && st < nextStart){
+      nextStart = st; nextRow = r;
+    }
+  });
+  if (nextRow){
+    nextRow.el.classList.add('next');
+    var toStart = nextStart - cur;
+    var txt = toStart >= 60 ? ('через ' + Math.floor(toStart/60) + ' ч ' + (toStart%60) + ' мин') : ('через ' + toStart + ' мин');
+    addStatus(nextRow.el, 'next-status', 'Дальше · ' + PAIRS[nextRow.pair][0] + ' (' + txt + ')');
+  }
+}
+tick();
+setInterval(tick, 30000);
+
+// Если страница открыта давно, а наступил новый день — перезагрузить, чтобы пересчиталась неделя
+var loadedDay = getNow().getDate();
+setInterval(function(){ if (getNow().getDate() !== loadedDay) location.reload(); }, 60000);
+
+// Прокрутить к сегодняшнему дню
+var todayCard = document.querySelector('.day-card.today, .rest-card.today');
+if (todayCard && !TEST_T) { setTimeout(function(){ todayCard.scrollIntoView({block:'center', behavior:'smooth'}); }, 300); }
 </script>
 </body>
 </html>
